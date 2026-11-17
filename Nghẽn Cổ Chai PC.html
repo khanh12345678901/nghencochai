@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nghẽn Cổ Chai PC – Tìm đúng linh kiện đang kéo chậm máy bạn</title>
+<meta name="description" content="Tự kiểm tra nghẽn cổ chai (bottleneck) PC bằng Task Manager, biết nên nâng cấp CPU, RAM, SSD hay card đồ họa trước.">
+<style>
+:root{--bg:#eef2f6;--surface:#ffffff;--ink:#14202e;--muted:#566377;--line:#d3dbe5;--accent:#0b7285;--accent-ink:#ffffff;--hot:#d9363e;--bar:#9fb3c8;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a26;--surface:#172433;--ink:#e6edf5;--muted:#9cabbd;--line:#2a3a4d;--accent:#3bc9db;--accent-ink:#06222a;--hot:#ff6b6b;--bar:#4a6178;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1a26;--surface:#172433;--ink:#e6edf5;--muted:#9cabbd;--line:#2a3a4d;--accent:#3bc9db;--accent-ink:#06222a;--hot:#ff6b6b;--bar:#4a6178;color-scheme:dark}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--surface);z-index:10}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--surface);border-bottom:1px solid var(--line);z-index:11}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:56px}
+.logo{font-weight:800;letter-spacing:-.02em;text-decoration:none;color:var(--ink)}
+.logo b{color:var(--hot)}
+nav{display:flex;gap:18px;overflow-x:auto}
+nav a{color:var(--muted);text-decoration:none;font-size:15px;white-space:nowrap}
+nav a:hover,nav a:focus-visible{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1{font-size:clamp(32px,6vw,54px);line-height:1.08;letter-spacing:-.035em;font-weight:800;margin:48px 0 14px;max-width:16ch}
+h2{font-size:clamp(24px,4vw,32px);letter-spacing:-.025em;margin:64px 0 8px}
+h3{margin:0 0 4px;font-size:18px}
+.lead{color:var(--muted);max-width:60ch;margin:0 0 28px}
+.diag{display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.opts{padding:20px;border-right:1px solid var(--line)}
+.opts p{margin:0 0 12px;font-weight:700}
+.opts label{display:block;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:15px}
+.opts label:has(input:checked){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.opts input{margin-right:8px;accent-color:var(--accent)}
+.gauge{padding:20px}
+.row{display:grid;grid-template-columns:64px 1fr 44px;align-items:center;gap:10px;margin-bottom:14px;font-size:14px}
+.track{height:14px;background:var(--bg);border-radius:7px;overflow:hidden}
+.fill{height:100%;width:0;background:var(--bar);border-radius:7px;transition:width .6s ease,background .3s}
+.fill.hot{background:var(--hot)}
+.row.hot .name,.row.hot .pct{color:var(--hot);font-weight:700}
+.pct{text-align:right;font-variant-numeric:tabular-nums}
+.note{font-size:12px;color:var(--muted);margin:0 0 14px}
+#result{border-top:1px solid var(--line);padding-top:14px;min-height:120px}
+#result h3{color:var(--hot)}
+#result p{margin:0 0 12px}
+.btn{display:inline-block;padding:10px 16px;border-radius:8px;background:var(--accent);color:var(--accent-ink);font-weight:700;text-decoration:none;font-size:15px}
+.btn.off{background:transparent;border:1px dashed var(--line);color:var(--muted);font-weight:400}
+.list{display:grid;gap:14px}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+summary{cursor:pointer;font-weight:700;font-size:17px}
+details[open] summary{margin-bottom:10px}
+details p,details li{max-width:70ch}
+.soon{color:var(--muted);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.prod{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.prod p{margin:0;color:var(--muted);font-size:15px;flex:1}
+footer{margin-top:72px;border-top:1px solid var(--line);background:var(--surface);padding:28px 0;color:var(--muted);font-size:14px}
+@media (max-width:720px){.diag{grid-template-columns:1fr}.opts{border-right:0;border-bottom:1px solid var(--line)}}
+@media (prefers-reduced-motion:reduce){.fill{transition:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="logo" href="#top">Nghẽn Cổ Chai <b>PC</b></a>
+  <nav><a href="#chan-doan">Chẩn đoán</a><a href="#bai-viet">Bài viết</a><a href="#tai-lieu">Tài liệu sửa PC</a><a href="#linh-kien">Linh kiện</a></nav>
+</div></header>
+
+<main class="wrap" id="top">
+  <h1>Máy bạn đang nghẽn ở đâu?</h1>
+  <p class="lead">Mở Task Manager lúc máy đang chạy nặng, chọn triệu chứng bạn thấy bên dưới. Bạn sẽ biết linh kiện nào đang kéo chậm cả bộ máy và nên nâng cấp gì trước.</p>
+
+  <section class="diag" id="chan-doan" aria-label="Chẩn đoán nhanh">
+    <div class="opts">
+      <p>Task Manager của bạn đang hiện:</p>
+      <label><input type="radio" name="s" value="cpu">CPU gần 100%, GPU thấp hơn hẳn</label>
+      <label><input type="radio" name="s" value="gpu">GPU gần 100%, CPU còn dư</label>
+      <label><input type="radio" name="s" value="ram">RAM (Memory) đầy liên tục</label>
+      <label><input type="radio" name="s" value="ssd">Ổ đĩa (Disk) gần 100% khi mở máy hoặc game</label>
+    </div>
+    <div class="gauge">
+      <div id="bars"></div>
+      <p class="note">Số liệu minh họa, không phải kết quả đo máy của bạn.</p>
+      <div id="result" aria-live="polite"><p>Chọn một triệu chứng ở bên trái để xem kết quả.</p></div>
+    </div>
+  </section>
+
+  <h2 id="bai-viet">Bài viết</h2>
+  <div class="list">
+    <details>
+      <summary>Nghẽn cổ chai PC là gì? Cách kiểm tra và khắc phục tại nhà</summary>
+      <p>Máy tính hoạt động như một dây chuyền: CPU, RAM, ổ cứng và card đồ họa phải làm việc ăn khớp. Nếu một bộ phận quá chậm, các bộ phận còn lại phải chờ, nên hiệu năng cả máy bị giới hạn bởi bộ phận yếu nhất. Đó là nghẽn cổ chai (bottleneck).</p>
+      <p><strong>Cách kiểm tra:</strong> mở game hoặc phần mềm đang thấy chậm, nhấn Ctrl + Shift + Esc, chọn thẻ Performance rồi quan sát CPU, Memory, Disk và GPU.</p>
+      <ul>
+        <li>CPU gần 100% nhưng GPU thấp: CPU là điểm nghẽn.</li>
+        <li>GPU gần 100%, CPU còn dư: card đang chạy hết sức, khi chơi game đây thường là trạng thái bình thường.</li>
+        <li>RAM đầy liên tục: thiếu RAM.</li>
+        <li>Disk gần 100% khi mở máy hoặc game: ổ cứng chậm, nhất là ổ HDD.</li>
+      </ul>
+      <p><strong>Khắc phục:</strong> chuyển HDD sang SSD; thêm RAM (ưu tiên 2 thanh để chạy dual-channel, kiểm tra loại RAM bo mạch chủ hỗ trợ); nâng CPU nhưng phải kiểm tra socket; nâng card đồ họa và kiểm tra công suất nguồn. Chưa muốn tốn tiền thì giảm độ phân giải, tắt chương trình chạy nền, vệ sinh bụi.</p>
+      <p><strong>An toàn:</strong> tắt máy, rút điện, chạm vào vỏ case kim loại để xả tĩnh điện trước khi chạm linh kiện. Hãy đo trước rồi mới mua.</p>
+    </details>
+    <p class="soon">Sắp có: CPU bottleneck là gì · Nâng cấp HDD lên SSD từng bước · Dual-channel RAM có đáng lắp 2 thanh · Nguồn bao nhiêu W là đủ.</p>
+  </div>
+
+  <h2 id="tai-lieu">Tài liệu sửa PC</h2>
+  <p class="lead">Các checklist ngắn để làm từng bước. Sẽ bổ sung dần theo từng bài.</p>
+  <div class="list">
+    <details><summary>PC không lên nguồn</summary><ol><li>Kiểm tra dây nguồn và ổ cắm.</li><li>Kiểm tra công tắc sau lưng nguồn (PSU).</li><li>Rút ra, cắm lại thanh RAM.</li><li>Cắm lại card đồ họa và dây nguồn phụ của card.</li></ol></details>
+    <details><summary>Máy chạy chậm</summary><ol><li>Mở Task Manager, xem CPU, RAM, Disk, GPU cái nào kịch trần.</li><li>Kiểm tra dung lượng ổ C còn trống.</li><li>Tắt bớt ứng dụng khởi động cùng Windows.</li></ol></details>
+    <details><summary>Máy nóng, quạt kêu to</summary><ol><li>Vệ sinh bụi ở quạt và tản nhiệt.</li><li>Kiểm tra quạt có quay đều không.</li><li>Tra lại keo tản nhiệt nếu máy đã dùng nhiều năm.</li></ol></details>
+    <details><summary>Màn hình xanh (BSOD)</summary><ol><li>Ghi lại mã lỗi hiện trên màn hình.</li><li>Cập nhật driver, nhất là card đồ họa.</li><li>Kiểm tra RAM bằng công cụ Windows Memory Diagnostic.</li></ol></details>
+  </div>
+
+  <h2 id="linh-kien">Linh kiện nên xem khi nâng cấp</h2>
+  <p class="lead">Mỗi mục tương ứng một điểm nghẽn ở trên. Hãy kiểm tra thông số tương thích với máy của bạn trước khi mua.</p>
+  <div class="grid" id="prods"></div>
+</main>
+
+<footer><div class="wrap">
+  <p>Tiết lộ liên kết: trang này có link tiếp thị. Mình có thể nhận hoa hồng khi bạn mua qua link, giá bạn mua không đổi.</p>
+  <p>Hướng dẫn mang tính tham khảo. Khi tháo lắp linh kiện, luôn tắt máy và rút điện trước.</p>
+</div></footer>
+
+<script>
+// Dán link Shopee Affiliate của bạn vào các dòng dưới đây (giữa hai dấu nháy)
+var LINKS = { cpu:"", ram:"", ssd:"", gpu:"", psu:"", paste:"" };
+
+var PRODS = [
+  {k:"ssd", n:"SSD", d:"Máy mở chậm, game load lâu? SSD thường là nâng cấp đáng tiền nhất cho máy còn dùng ổ HDD."},
+  {k:"ram", n:"RAM", d:"Thiếu RAM thì máy giật khi mở nhiều tab hoặc phần mềm. Kiểm tra loại RAM mà bo mạch chủ hỗ trợ."},
+  {k:"gpu", n:"Card đồ họa", d:"Muốn chơi game mượt hơn khi CPU còn dư sức. Kiểm tra công suất nguồn trước khi mua."},
+  {k:"cpu", n:"CPU", d:"Khi CPU kịch trần mà GPU rảnh. Phải kiểm tra socket của bo mạch chủ có tương thích."},
+  {k:"psu", n:"Nguồn (PSU)", d:"Nâng card đồ họa thì cần nguồn đủ công suất và đủ đầu cấp điện."},
+  {k:"paste", n:"Keo tản nhiệt", d:"Máy nóng sau nhiều năm dùng? Tra lại keo là cách rẻ để giảm nhiệt."}
+];
+var SC = {
+  cpu:{v:[98,55,30,40],h:0,t:"CPU đang là điểm nghẽn",d:"CPU chạy hết sức trong khi card đồ họa chưa được dùng hết. Thử tắt chương trình chạy nền và vệ sinh tản nhiệt. Nếu vẫn chậm thì nâng CPU, nhớ kiểm tra socket bo mạch chủ.",k:"cpu"},
+  gpu:{v:[55,50,25,98],h:3,t:"GPU chạy hết sức",d:"Khi chơi game, đây thường là trạng thái bình thường và tốt. Muốn mượt hơn thì giảm độ phân giải hoặc đồ họa, hoặc nâng card đồ họa.",k:"gpu"},
+  ram:{v:[45,96,70,40],h:1,t:"Máy đang thiếu RAM",d:"RAM đầy nên Windows phải dùng ổ cứng thay thế, làm máy chậm. Thêm RAM cùng loại với bo mạch chủ, ưu tiên 2 thanh để chạy dual-channel.",k:"ram"},
+  ssd:{v:[30,55,99,25],h:2,t:"Ổ đĩa đang là điểm nghẽn",d:"Ổ cứng quá chậm nên các linh kiện còn lại phải chờ. Nếu đang dùng HDD, chuyển sang SSD sẽ thấy khác biệt rõ.",k:"ssd"}
+};
+var NAMES = ["CPU","RAM","Ổ đĩa","GPU"];
+
+function btn(k){
+  var u = LINKS[k];
+  if(u){ return '<a class="btn" href="'+u+'" target="_blank" rel="sponsored nofollow noopener">Xem trên Shopee</a>'; }
+  return '<span class="btn off">Link đang cập nhật</span>';
+}
+function bars(v,h){
+  var s = "";
+  for(var i=0;i<4;i++){
+    var hot = (h===i);
+    s += '<div class="row'+(hot?' hot':'')+'"><span class="name">'+NAMES[i]+'</span><div class="track"><div class="fill'+(hot?' hot':'')+'" data-w="'+(v?v[i]:0)+'"></div></div><span class="pct">'+(v?v[i]+'%':'–')+'</span></div>';
+  }
+  document.getElementById("bars").innerHTML = s;
+  setTimeout(function(){
+    var f = document.querySelectorAll(".fill");
+    for(var j=0;j<f.length;j++){ f[j].style.width = f[j].getAttribute("data-w")+"%"; }
+  },30);
+}
+bars(null,-1);
+var radios = document.querySelectorAll('input[name="s"]');
+for(var i=0;i<radios.length;i++){
+  radios[i].addEventListener("change", function(e){
+    var c = SC[e.target.value];
+    bars(c.v,c.h);
+    document.getElementById("result").innerHTML = '<h3>'+c.t+'</h3><p>'+c.d+'</p>'+btn(c.k);
+  });
+}
+var p = "";
+for(var j=0;j<PRODS.length;j++){
+  p += '<div class="prod"><h3>'+PRODS[j].n+'</h3><p>'+PRODS[j].d+'</p><div>'+btn(PRODS[j].k)+'</div></div>';
+}
+document.getElementById("prods").innerHTML = p;
+</script>
+</body>
+</html>
